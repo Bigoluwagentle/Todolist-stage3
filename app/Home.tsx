@@ -13,25 +13,24 @@ import {
 } from "react-native";
 import { api } from "../convex/_generated/api";
 
-import Logo from "../assets/images/TODO.svg";
-import Check from "../assets/images/icon-check.svg";
-import Cross from "../assets/images/icon-cross.svg";
-import Moon from "../assets/images/icon-moon.svg";
-import Sun from "../assets/images/icon-sun.svg";
+const images = {
+  logo: require('../assets/images/TODO.svg'),
+  Check: require('../assets/images/icon-check.svg'),
+  Cross: require('../assets/images/icon-cross.svg'),
+  Moon: require('../assets/images/icon-moon.svg'),
+  Sun: require('../assets/images/icon-sun.svg'),
+};
 
 export default function Home() {
-  // Convex realtime hooks
   const todos = useQuery(api.todos.get) ?? [];
   const addTodo = useMutation(api.todos.add);
   const toggleTodo = useMutation(api.todos.toggle);
   const removeTodo = useMutation(api.todos.remove);
 
-  // Local state
   const [inputValue, setInputValue] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Load theme from storage on mount
   useEffect(() => {
     (async () => {
       const savedTheme = await AsyncStorage.getItem("theme");
@@ -39,7 +38,6 @@ export default function Home() {
     })();
   }, []);
 
-  // Save theme when toggled
   const toggleTheme = async () => {
     const newTheme = !isDarkMode;
     setIsDarkMode(newTheme);
@@ -48,7 +46,6 @@ export default function Home() {
 
   const theme = isDarkMode ? darkTheme : lightTheme;
 
-  // CRUD
   const handleAddTodo = async () => {
     if (!inputValue.trim()) return;
     await addTodo({ text: inputValue.trim() });
@@ -63,7 +60,6 @@ export default function Home() {
     await removeTodo({ id });
   };
 
-  // Filters
   const filteredTodos =
     todos.filter((todo) => {
       if (filter === "active") return !todo.completed;
@@ -87,15 +83,13 @@ export default function Home() {
 
       <View style={styles.main}>
         <View style={styles.mainChild}>
-          {/* Header with theme toggle */}
           <View style={styles.headerRow}>
-            <Image source={Logo} />
+            <Image source={images['logo']} />
             <TouchableOpacity onPress={toggleTheme}>
-              <Image source={isDarkMode ? Sun : Moon} />
+              <Image source={isDarkMode ? images.Sun : images.Moon} />
             </TouchableOpacity>
           </View>
 
-          {/* Input */}
           <View
             style={[
               styles.inputContainer,
@@ -114,7 +108,6 @@ export default function Home() {
             />
           </View>
 
-          {/* Todo List */}
           <View style={[styles.todoListContainer, { backgroundColor: theme.card }]}>
             {filteredTodos.map((todo) => (
               <View key={todo._id} style={[styles.todoList, { borderBottomColor: theme.border }]}>
@@ -128,11 +121,7 @@ export default function Home() {
                     onPress={() => handleToggleTodo(todo._id)}
                   >
                     {todo.completed && (
-                      <Image
-                        source={Check}
-                        style={{ width: 15, height: 15 }}
-                        resizeMode="contain"
-                      />
+                      <Image source={images['Check']} style={{ width: 15, height: 15 }} resizeMode="contain" />
                     )}
                   </TouchableOpacity>
                   <Text
@@ -147,12 +136,11 @@ export default function Home() {
                 </View>
 
                 <TouchableOpacity onPress={() => handleRemoveTodo(todo._id)}>
-                  <Image source={Cross} style={styles.remove} />
+                  <Image source={images['Cross']} style={styles.remove} />
                 </TouchableOpacity>
               </View>
             ))}
 
-            {/* Footer info */}
             <View style={styles.bottom}>
               <Text style={[styles.item, { color: theme.subtext }]}>
                 {itemsLeft} items left
@@ -160,7 +148,6 @@ export default function Home() {
             </View>
           </View>
 
-          {/* Filters */}
           <View style={[styles.filterContainer, { backgroundColor: theme.card }]}>
             <TouchableOpacity onPress={() => setFilter("all")}>
               <Text
@@ -214,7 +201,6 @@ export default function Home() {
   );
 }
 
-// THEMES
 const lightTheme = {
   background: "hsl(0, 0%, 98%)",
   card: "hsl(0, 0%, 98%)",
@@ -235,7 +221,6 @@ const darkTheme = {
   shadow: "rgba(0,0,0,0.5)",
 };
 
-// STYLES
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { width: "100%", minHeight: 200 },
